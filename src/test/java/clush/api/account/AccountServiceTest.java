@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import clush.api.account.entity.Users;
 import clush.api.account.entity.request.AccountCreateReq;
 import clush.api.account.entity.request.LoginReq;
+import clush.api.account.entity.request.TokenRefreshReq;
 import clush.api.account.entity.response.LoginRes;
+import clush.api.auth.JwtUtil;
 import clush.api.common.exception.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -30,6 +32,8 @@ class AccountServiceTest {
 
     @PersistenceContext
     private EntityManager em;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Test
     public void 계정생성() {
@@ -106,9 +110,31 @@ class AccountServiceTest {
 
         // when
         LoginRes res = accountService.login(req);
+        jwtUtil.validateToken(res.accessToken());
 
         // then
         assertThat(res).isNotNull();
         assertThat(res.username()).isEqualTo("유저1");
+    }
+
+    @Test
+    public void 토큰_리프레시() {
+        // give
+        Users user = Users.builder()
+                .username("유저1")
+                .email("email@example.com")
+                .password(passwordEncoder.encode("qwer1234!"))
+                .build();
+        em.persist(user);
+        em.flush();
+        em.clear();
+
+        LoginReq req = new LoginReq("email@example.com", "qwer1234!");
+        LoginRes res = accountService.login(req);
+        TokenRefreshReq tokenReq = new TokenRefreshReq(res.accessToken(), res.refreshToken());
+
+        // when
+        LoginRes tokenRes = accountService.tokenRefresh(tokenReq);
+        jwtUtil.validateToken(tokenRes.accessToken());
     }
 }

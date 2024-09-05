@@ -6,9 +6,12 @@ import static clush.api.account.AccountErrorCode.REQUIRED_EMAIL;
 import static clush.api.account.AccountErrorCode.REQUIRED_NAME;
 import static clush.api.account.AccountErrorCode.REQUIRED_PASSWORD;
 import static clush.api.account.AccountErrorCode.REQUIRED_PASSWORD_CONFIRM;
+import static clush.api.auth.TokenErrorCode.NO_ACCESS_TOKEN;
+import static clush.api.auth.TokenErrorCode.NO_REFRESH_TOKEN;
 
 import clush.api.account.entity.request.AccountCreateReq;
 import clush.api.account.entity.request.LoginReq;
+import clush.api.account.entity.request.TokenRefreshReq;
 import clush.api.account.entity.response.LoginRes;
 import clush.api.common.exception.BindingResultHandler;
 import jakarta.validation.Valid;
@@ -51,5 +54,13 @@ public class AccountController {
         BindingResultHandler.execute(bindingResult, List.of(REQUIRED_EMAIL, REQUIRED_PASSWORD));
 
         return accountService.login(req);
+    }
+
+    @PostMapping("token-refresh")
+    public LoginRes tokenRefresh(@Valid @RequestBody TokenRefreshReq req,
+            BindingResult bindingResult) {
+        BindingResultHandler.execute(bindingResult, List.of(NO_ACCESS_TOKEN, NO_REFRESH_TOKEN));
+
+        return accountService.tokenRefresh(req);
     }
 }
