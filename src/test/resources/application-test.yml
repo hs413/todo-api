@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/clush_test
+    username: root
+    password:
+
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+
+security:
+  origins: http://localhost:3000,http://localhost:8080
+  jwt-secret: dev42123456789012345678901234fweqxv
