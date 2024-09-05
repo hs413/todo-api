@@ -1,4 +1,4 @@
-package clush.api.accounts.entity;
+package clush.api.account.entity;
 
 import clush.api.common.BaseEntity;
 import jakarta.persistence.Column;
