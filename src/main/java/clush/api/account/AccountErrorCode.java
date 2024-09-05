@@ -20,7 +20,8 @@ public enum AccountErrorCode implements ErrorCode {
     DIFFERENT_PASSWORD_CONFIRM(BAD_REQUEST, "비밀번호 확인이 일치하지 않습니다"),
 
     REQUIRED_NAME(BAD_REQUEST, "이름이 입력되지 않았습니다"),
-
+    NO_EMAIL_OR_PASSWORD(BAD_REQUEST, "아이디 또는 비밀번호가 잘못되었습니다. 다시 입력해 주세요"),
+    NO_USERS(BAD_REQUEST, "존재하지 않는 사용자입니다."),
     ;
 
     private final HttpStatus status;

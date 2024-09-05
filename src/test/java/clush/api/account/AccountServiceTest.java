@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import clush.api.account.entity.Users;
 import clush.api.account.entity.request.AccountCreateReq;
+import clush.api.account.entity.request.LoginReq;
+import clush.api.account.entity.response.LoginRes;
 import clush.api.common.exception.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -36,7 +38,7 @@ class AccountServiceTest {
                 "qwer1234!", "qwer1234!");
 
         // when
-        Long id = accountService.createAccounts(req);
+        Long id = accountService.createAccount(req);
         em.flush();
         em.clear();
 
@@ -57,7 +59,7 @@ class AccountServiceTest {
 
         // when
         CustomException ex = assertThrows(CustomException.class, () -> {
-            accountService.createAccounts(req);
+            accountService.createAccount(req);
         });
 
         // then
@@ -81,11 +83,32 @@ class AccountServiceTest {
 
         // when
         CustomException ex = assertThrows(CustomException.class, () -> {
-            accountService.createAccounts(req);
+            accountService.createAccount(req);
         });
 
         // then
         assertThat(ex.getErrorCode()).isEqualTo(AccountErrorCode.DUPLICATED_EMAIL);
     }
 
+    @Test
+    public void 로그인() {
+        // give
+        Users user = Users.builder()
+                .username("유저1")
+                .email("email@example.com")
+                .password(passwordEncoder.encode("qwer1234!"))
+                .build();
+        em.persist(user);
+        em.flush();
+        em.clear();
+
+        LoginReq req = new LoginReq("email@example.com", "qwer1234!");
+
+        // when
+        LoginRes res = accountService.login(req);
+
+        // then
+        assertThat(res).isNotNull();
+        assertThat(res.username()).isEqualTo("유저1");
+    }
 }

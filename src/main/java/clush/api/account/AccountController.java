@@ -8,6 +8,8 @@ import static clush.api.account.AccountErrorCode.REQUIRED_PASSWORD;
 import static clush.api.account.AccountErrorCode.REQUIRED_PASSWORD_CONFIRM;
 
 import clush.api.account.entity.request.AccountCreateReq;
+import clush.api.account.entity.request.LoginReq;
+import clush.api.account.entity.response.LoginRes;
 import clush.api.common.exception.BindingResultHandler;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -39,7 +41,15 @@ public class AccountController {
                 INVALID_PASSWORD_PATTERN,
                 REQUIRED_PASSWORD_CONFIRM));
 
-        accountService.createAccounts(req);
+        accountService.createAccount(req);
     }
 
+    @PostMapping("login")
+    public LoginRes login(@Valid @RequestBody LoginReq req,
+            BindingResult bindingResult) {
+
+        BindingResultHandler.execute(bindingResult, List.of(REQUIRED_EMAIL, REQUIRED_PASSWORD));
+
+        return accountService.login(req);
+    }
 }
