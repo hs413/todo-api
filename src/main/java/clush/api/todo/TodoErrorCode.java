@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 public enum TodoErrorCode implements ErrorCode {
     REQUIRED_TITLE(BAD_REQUEST, "제목을 입력해주세요."),
     REQUIRED_DESCRIPTION(BAD_REQUEST, "설명을 입력해주세요."),
+    NO_TODOS(BAD_REQUEST, "할일이 존재하지 않습니다."),
+    NO_PERMISSION(BAD_REQUEST, "권한이 없습니다."),
     ;
 
     private final HttpStatus status;
