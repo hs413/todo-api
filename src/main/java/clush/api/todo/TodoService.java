@@ -65,4 +65,15 @@ public class TodoService {
 
         return todos.getId();
     }
+
+    public void todoDelete(Long userId, Long todoId) {
+        Todos todos = todoRepository.findById(todoId)
+                .orElseThrow(() -> new CustomException(TodoErrorCode.NO_TODOS));
+
+        if (todos.getUser().getId() != userId) {
+            throw new CustomException(TodoErrorCode.NO_TODOS);
+        }
+
+        todoRepository.delete(todos);
+    }
 }

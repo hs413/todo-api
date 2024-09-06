@@ -137,18 +137,24 @@ class TodoServiceTest {
         assertThat(todos.getStatus()).isEqualTo(TodosStatus.IN_PROGRESS);
         assertThat(todos.getPriority()).isEqualTo(TodosPriority.HIGH);
     }
-//
-//    @Test
-//    public void 할일_삭제() {
-//        Todos todo = Todos.builder()
-//                .title("todo 1")
-//                .description("todo todo 1")
-//                .status(TodosStatus.PENDING)
-//                .priority(TodosPriority.MEDIUM)
-//                .user(user)
-//                .build();
-//        em.persist(todo);
-//        em.flush();
-//        em.clear();
-//    }
+
+    @Test
+    public void 할일_삭제() {
+        Todos todo = Todos.builder()
+                .title("todo 1")
+                .description("todo todo 1")
+                .status(TodosStatus.PENDING)
+                .priority(TodosPriority.MEDIUM)
+                .user(user)
+                .build();
+        em.persist(todo);
+        em.flush();
+        em.clear();
+
+        todoService.todoDelete(user.getId(), todo.getId());
+
+        Todos todos = em.find(Todos.class, todo.getId());
+
+        assertThat(todos).isNull();
+    }
 }
