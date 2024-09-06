@@ -1,11 +1,13 @@
 package clush.api.todo;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import clush.api.account.entity.Users;
 import clush.api.todo.entity.Todos;
 import clush.api.todo.entity.TodosPriority;
 import clush.api.todo.entity.TodosStatus;
 import clush.api.todo.entity.request.TodoCreateReq;
-import clush.api.todo.entity.response.TodoListRes;
+import clush.api.todo.entity.response.TodoRes;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -55,7 +57,7 @@ class TodoServiceTest {
 
         // then
         Todos todos = em.find(Todos.class, todoId);
-        Assertions.assertThat(todos.getTitle()).isEqualTo("todo 1");
+        assertThat(todos.getTitle()).isEqualTo("todo 1");
     }
 
     @Test
@@ -77,8 +79,60 @@ class TodoServiceTest {
         PageRequest pageRequest = PageRequest.of(0, 10, Direction.DESC, "id");
 
         // when
-        List<TodoListRes> list = todoService.todoList(user.getId(), pageRequest);
+        List<TodoRes> list = todoService.todoList(user.getId(), pageRequest);
 
-        Assertions.assertThat(list).hasSize(10);
+        // then
+        assertThat(list).hasSize(10);
     }
+
+    @Test
+    public void 할일_상세() {
+        // give
+        Todos todo = Todos.builder()
+                .title("todo 1")
+                .description("todo todo 1")
+                .status(TodosStatus.PENDING)
+                .priority(TodosPriority.MEDIUM)
+                .user(user)
+                .build();
+        em.persist(todo);
+        em.flush();
+        em.clear();
+
+        TodoRes res = todoService.todoDetail(user.getId(), todo.getId());
+
+        assertThat(res).isNotNull();
+        assertThat(res.title()).isEqualTo("todo 1");
+        assertThat(res.description()).isEqualTo("todo todo 1");
+        assertThat(res.status()).isEqualTo(TodosStatus.PENDING);
+
+    }
+//
+//    @Test
+//    public void 할일_수정() {
+//        Todos todo = Todos.builder()
+//                .title("todo 1")
+//                .description("todo todo 1")
+//                .status(TodosStatus.PENDING)
+//                .priority(TodosPriority.MEDIUM)
+//                .user(user)
+//                .build();
+//        em.persist(todo);
+//        em.flush();
+//        em.clear();
+//    }
+//
+//    @Test
+//    public void 할일_삭제() {
+//        Todos todo = Todos.builder()
+//                .title("todo 1")
+//                .description("todo todo 1")
+//                .status(TodosStatus.PENDING)
+//                .priority(TodosPriority.MEDIUM)
+//                .user(user)
+//                .build();
+//        em.persist(todo);
+//        em.flush();
+//        em.clear();
+//    }
 }

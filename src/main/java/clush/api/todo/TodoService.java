@@ -6,7 +6,7 @@ import clush.api.account.entity.Users;
 import clush.api.common.exception.CustomException;
 import clush.api.todo.entity.Todos;
 import clush.api.todo.entity.request.TodoCreateReq;
-import clush.api.todo.entity.response.TodoListRes;
+import clush.api.todo.entity.response.TodoRes;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +33,20 @@ public class TodoService {
         return todos.getId();
     }
 
-    public List<TodoListRes> todoList(Long userId, Pageable pageable) {
+    public List<TodoRes> todoList(Long userId, Pageable pageable) {
         List<Todos> todos = todoRepository.findAllByUserId(userId, pageable);
 
-        return todos.stream().map(TodoListRes::new).toList();
+        return todos.stream().map(TodoRes::new).toList();
+    }
+
+    public TodoRes todoDetail(Long userId, Long todoId) {
+        Todos todos = todoRepository.findById(todoId)
+                .orElseThrow(() -> new CustomException(TodoErrorCode.NO_TODOS));
+
+        if (todos.getUser().getId() != userId) {
+            throw new CustomException(TodoErrorCode.NO_TODOS);
+        }
+
+        return new TodoRes(todos);
     }
 }

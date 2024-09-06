@@ -5,7 +5,7 @@ import clush.api.todo.entity.TodosPriority;
 import clush.api.todo.entity.TodosStatus;
 import java.time.LocalDateTime;
 
-public record TodoListRes(
+public record TodoRes(
         Long id,
         String title,
         String description,
@@ -14,7 +14,7 @@ public record TodoListRes(
         LocalDateTime dueDate
 ) {
 
-    public TodoListRes(Todos todos) {
+    public TodoRes(Todos todos) {
         this(
                 todos.getId(),
                 todos.getTitle(),
