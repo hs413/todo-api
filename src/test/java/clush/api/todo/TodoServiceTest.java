@@ -7,6 +7,7 @@ import clush.api.todo.entity.Todos;
 import clush.api.todo.entity.TodosPriority;
 import clush.api.todo.entity.TodosStatus;
 import clush.api.todo.entity.request.TodoCreateReq;
+import clush.api.todo.entity.request.TodoListReq;
 import clush.api.todo.entity.request.TodoUpdateReq;
 import clush.api.todo.entity.response.TodoRes;
 import jakarta.persistence.EntityManager;
@@ -18,7 +19,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
 @SpringBootTest
@@ -67,7 +70,7 @@ class TodoServiceTest {
                     .title("todo " + i)
                     .description("todo todo " + i)
                     .status(TodosStatus.PENDING)
-                    .priority(TodosPriority.MID)
+                    .priority(TodosPriority.fromValue(i % 3 + 1))
                     .user(user)
                     .build();
             em.persist(todo);
@@ -76,13 +79,15 @@ class TodoServiceTest {
         em.clear();
 
         // give
-        PageRequest pageRequest = PageRequest.of(0, 10, Direction.DESC, "id");
+        PageRequest pageRequest = PageRequest.of(0, 10, Direction.DESC, "priority");
+        TodoListReq req = new TodoListReq("wt", "");
 
         // when
-        List<TodoRes> list = todoService.todoList(user.getId(), pageRequest);
+        Page<TodoRes> list = todoService.todoList(user.getId(), pageRequest, req);
 
         // then
         assertThat(list).hasSize(10);
+        assertThat(list.getContent().get(0).priority()).isEqualTo(TodosPriority.HIGH);
     }
 
     @Test

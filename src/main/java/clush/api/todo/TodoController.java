@@ -4,6 +4,7 @@ import clush.api.auth.CustomPrincipal;
 import clush.api.auth.UserInfo;
 import clush.api.common.exception.BindingResultHandler;
 import clush.api.todo.entity.request.TodoCreateReq;
+import clush.api.todo.entity.request.TodoListReq;
 import clush.api.todo.entity.request.TodoUpdateReq;
 import clush.api.todo.entity.response.TodoRes;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,10 +12,12 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -46,11 +49,12 @@ public class TodoController {
     }
 
     @GetMapping
-    public List<TodoRes> getListTodo(
+    public Page<TodoRes> getListTodo(
             @CustomPrincipal UserInfo userInfo,
+            @ModelAttribute TodoListReq req,
             Pageable pageable
     ) {
-        return todoService.todoList(userInfo.id(), pageable);
+        return todoService.todoList(userInfo.id(), pageable, req);
     }
 
     @GetMapping("{todoId}")

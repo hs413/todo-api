@@ -6,12 +6,15 @@ import clush.api.account.entity.Users;
 import clush.api.common.exception.CustomException;
 import clush.api.todo.entity.Todos;
 import clush.api.todo.entity.request.TodoCreateReq;
+import clush.api.todo.entity.request.TodoListReq;
 import clush.api.todo.entity.request.TodoUpdateReq;
 import clush.api.todo.entity.response.TodoRes;
+import clush.api.todo.repository.TodoRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -34,10 +37,8 @@ public class TodoService {
         return todos.getId();
     }
 
-    public List<TodoRes> todoList(Long userId, Pageable pageable) {
-        List<Todos> todos = todoRepository.findAllByUserId(userId, pageable);
-
-        return todos.stream().map(TodoRes::new).toList();
+    public Page<TodoRes> todoList(Long userId, Pageable pageable, TodoListReq req) {
+        return todoRepository.findTodoList(userId, pageable, req);
     }
 
     public TodoRes todoDetail(Long userId, Long todoId) {
