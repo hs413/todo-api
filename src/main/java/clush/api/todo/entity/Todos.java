@@ -1,7 +1,10 @@
 package clush.api.todo.entity;
 
+import static org.springframework.util.StringUtils.hasText;
+
 import clush.api.account.entity.Users;
 import clush.api.common.BaseEntity;
+import clush.api.todo.entity.request.TodoUpdateReq;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 @Entity
 @Getter
@@ -49,4 +53,27 @@ public class Todos extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
+
+
+    public void update(TodoUpdateReq req) {
+        if (hasText(req.title())) {
+            title = req.title();
+        }
+
+        if (hasText(req.description())) {
+            description = req.description();
+        }
+
+        if (req.status() != null) {
+            status = req.status();
+        }
+
+        if (req.priority() != null) {
+            priority = req.priority();
+        }
+
+        if (req.dueDate() != null) {
+            dueDate = req.dueDate();
+        }
+    }
 }
