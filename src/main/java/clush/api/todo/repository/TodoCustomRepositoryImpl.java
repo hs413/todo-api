@@ -1,14 +1,18 @@
 package clush.api.todo.repository;
 
 import static clush.api.todo.entity.QTodos.*;
+import static org.springframework.util.StringUtils.hasText;
 
 import clush.api.todo.entity.QTodos;
 import clush.api.todo.entity.Todos;
+import clush.api.todo.entity.TodosStatus;
 import clush.api.todo.entity.request.TodoListReq;
 import clush.api.todo.entity.response.QTodoRes;
 import clush.api.todo.entity.response.TodoRes;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -40,10 +44,10 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository {
                         todos.createdAt
                 ))
                 .from(todos)
-//                .where(
-//                        typeEq(type),
-//                        titleLike(request.keyword())
-//                )
+                .where(
+                        search(req.getTypes(), req.keyword()),
+                        statusEq(req.status())
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(orders(todos, pageable.getSort()))
@@ -51,10 +55,10 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository {
 
         JPAQuery<Todos> countQuery = queryFactory
                 .select(todos)
-//                .where(
-//                        typeEq(request.todosType()),
-//                        titleLike(request.keyword())
-//                )
+                .where(
+                        search(req.getTypes(), req.keyword()),
+                        statusEq(req.status())
+                )
                 .from(todos);
 
         return PageableExecutionUtils.getPage(list, pageable, countQuery::fetchCount);
@@ -74,6 +78,37 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository {
             orderSpecifiers.add(orderSpecifier);
         }
 
+        if (orderSpecifiers.isEmpty()) {
+            orderSpecifiers.add(todos.id.desc());
+        }
+
         return orderSpecifiers.toArray(OrderSpecifier[]::new);
     }
+
+    private BooleanBuilder search(String[] types, String keyword) {
+        if (types == null || !hasText(keyword)) {
+            return null;
+        }
+
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+
+        for (String type : types) {
+
+            switch (type) {
+                case "title":
+                    booleanBuilder.or(todos.title.contains(keyword));
+                    break;
+                case "description":
+                    booleanBuilder.or(todos.description.contains(keyword));
+                    break;
+            }
+        }
+
+        return booleanBuilder;
+    }
+
+    private BooleanExpression statusEq(TodosStatus status) {
+        return status != null ? todos.status.eq(status) : null;
+    }
+
 }

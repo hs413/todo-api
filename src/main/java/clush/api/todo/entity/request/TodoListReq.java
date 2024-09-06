@@ -1,15 +1,18 @@
 package clush.api.todo.entity.request;
 
+import clush.api.todo.entity.TodosStatus;
+import org.springframework.util.StringUtils;
+
 public record TodoListReq(
-        String type,
-        String keyword
+        String keyword,
+        String type, // title,description
+        TodosStatus status
 ) {
 
     public String[] getTypes() {
-        if (type == null || type.isEmpty()) {
-            return null;
+        if (StringUtils.hasText(type)) {
+            return type.split(",");
         }
-        return type.split("");
+        return null;
     }
-
 }
