@@ -14,9 +14,7 @@ public record TodoUpdateReq(
 
         TodosStatus status,
 
-        TodosPriority priority,
-
-        LocalDateTime dueDate
+        TodosPriority priority
 ) {
 
 }

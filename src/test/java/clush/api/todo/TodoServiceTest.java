@@ -50,7 +50,7 @@ class TodoServiceTest {
     public void 할일_생성() {
         // give
         TodoCreateReq req = new TodoCreateReq("todo 1", "todo todo",
-                null, null, null);
+                null, null);
 
         // when
         Long todoId = todoService.todoCreate(user.getId(), req);
@@ -67,7 +67,7 @@ class TodoServiceTest {
                     .title("todo " + i)
                     .description("todo todo " + i)
                     .status(TodosStatus.PENDING)
-                    .priority(TodosPriority.MEDIUM)
+                    .priority(TodosPriority.MID)
                     .user(user)
                     .build();
             em.persist(todo);
@@ -92,7 +92,7 @@ class TodoServiceTest {
                 .title("todo 1")
                 .description("todo todo 1")
                 .status(TodosStatus.PENDING)
-                .priority(TodosPriority.MEDIUM)
+                .priority(TodosPriority.MID)
                 .user(user)
                 .build();
         em.persist(todo);
@@ -117,7 +117,7 @@ class TodoServiceTest {
                 .title("todo 1")
                 .description("todo todo 1")
                 .status(TodosStatus.PENDING)
-                .priority(TodosPriority.MEDIUM)
+                .priority(TodosPriority.MID)
                 .user(user)
                 .build();
         em.persist(todo);
@@ -126,7 +126,7 @@ class TodoServiceTest {
 
         // when
         TodoUpdateReq req = new TodoUpdateReq("todo 2", "todo todo 2",
-                TodosStatus.IN_PROGRESS, TodosPriority.HIGH, null);
+                TodosStatus.IN_PROGRESS, TodosPriority.HIGH);
 
         Long todoId = todoService.todoUpdate(user.getId(), todo.getId(), req);
 
@@ -144,7 +144,7 @@ class TodoServiceTest {
                 .title("todo 1")
                 .description("todo todo 1")
                 .status(TodosStatus.PENDING)
-                .priority(TodosPriority.MEDIUM)
+                .priority(TodosPriority.MID)
                 .user(user)
                 .build();
         em.persist(todo);

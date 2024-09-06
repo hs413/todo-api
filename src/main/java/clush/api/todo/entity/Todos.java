@@ -6,6 +6,7 @@ import clush.api.account.entity.Users;
 import clush.api.common.BaseEntity;
 import clush.api.todo.entity.request.TodoUpdateReq;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -43,12 +44,9 @@ public class Todos extends BaseEntity {
     @Column(nullable = false)
     private TodosStatus status;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = PriorityConverter.class)
     @Column(nullable = false)
     private TodosPriority priority;
-
-    @Column(nullable = true)
-    private LocalDateTime dueDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -72,8 +70,5 @@ public class Todos extends BaseEntity {
             priority = req.priority();
         }
 
-        if (req.dueDate() != null) {
-            dueDate = req.dueDate();
-        }
     }
 }

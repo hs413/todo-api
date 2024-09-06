@@ -16,9 +16,7 @@ public record TodoCreateReq(
 
         TodosStatus status,
 
-        TodosPriority priority,
-
-        LocalDateTime dueDate
+        TodosPriority priority
 ) {
 
     public Todos toEntity(Users user) {
@@ -26,9 +24,8 @@ public record TodoCreateReq(
                 .user(user)
                 .title(title)
                 .description(description)
-                .priority(priority == null ? TodosPriority.MEDIUM : priority)
+                .priority(priority == null ? TodosPriority.MID : priority)
                 .status(status == null ? TodosStatus.PENDING : status)
-                .dueDate(dueDate)
                 .build();
     }
 }

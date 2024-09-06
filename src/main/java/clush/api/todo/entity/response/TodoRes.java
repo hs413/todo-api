@@ -10,8 +10,7 @@ public record TodoRes(
         String title,
         String description,
         TodosStatus status,
-        TodosPriority priority,
-        LocalDateTime dueDate
+        TodosPriority priority
 ) {
 
     public TodoRes(Todos todos) {
@@ -20,8 +19,7 @@ public record TodoRes(
                 todos.getTitle(),
                 todos.getDescription(),
                 todos.getStatus(),
-                todos.getPriority(),
-                todos.getDueDate()
+                todos.getPriority()
         );
     }
 

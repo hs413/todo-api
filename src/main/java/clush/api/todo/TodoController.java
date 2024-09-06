@@ -6,6 +6,7 @@ import clush.api.common.exception.BindingResultHandler;
 import clush.api.todo.entity.request.TodoCreateReq;
 import clush.api.todo.entity.request.TodoUpdateReq;
 import clush.api.todo.entity.response.TodoRes;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +30,8 @@ public class TodoController {
 
     private final TodoService todoService;
 
-
     @PostMapping
+    @Operation(summary = "할일 등록", description = "할일을 등록한다.")
     public void createTodo(
             @CustomPrincipal UserInfo userInfo,
             @Valid @RequestBody TodoCreateReq req,
