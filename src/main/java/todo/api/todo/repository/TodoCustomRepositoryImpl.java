@@ -2,6 +2,7 @@ package todo.api.todo.repository;
 
 import static org.springframework.util.StringUtils.hasText;
 import static todo.api.todo.entity.QTodos.todos;
+import static todo.api.todo.entity.QTodosSharing.todosSharing;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
@@ -66,6 +67,45 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository {
         return PageableExecutionUtils.getPage(list, pageable, countQuery::fetchCount);
     }
 
+    @Override
+    public Page<TodoRes> findSharedList(Long userId, Pageable pageable, TodoListReq req) {
+        List<Long> todoIds = queryFactory
+                .select(todosSharing.todos.id)
+                .from(todosSharing)
+                .where(todosSharing.sharedUser.id.eq(userId))
+                .fetch();
+
+        List<TodoRes> list = queryFactory
+                .select(new QTodoRes(
+                        todos.id,
+                        todos.title,
+                        todos.description,
+                        todos.status,
+                        todos.priority,
+                        todos.createdAt
+                ))
+                .from(todos)
+                .where(
+                        todos.id.in(todoIds),
+                        search(req.getTypes(), req.keyword()),
+                        statusEq(req.status())
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(orders(todos, pageable.getSort()))
+                .fetch();
+
+        JPAQuery<Todos> countQuery = queryFactory
+                .select(todos)
+                .where(
+                        todos.id.in(todoIds),
+                        search(req.getTypes(), req.keyword()),
+                        statusEq(req.status())
+                )
+                .from(todos);
+
+        return PageableExecutionUtils.getPage(list, pageable, countQuery::fetchCount);
+    }
 
     private OrderSpecifier[] orders(QTodos todos, Sort sort) {
         List<OrderSpecifier> orderSpecifiers = new ArrayList<>();

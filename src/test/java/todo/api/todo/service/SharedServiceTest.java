@@ -7,15 +7,18 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import todo.api.account.entity.Users;
 import todo.api.todo.entity.Todos;
 import todo.api.todo.entity.TodosSharing;
 import todo.api.todo.entity.enums.TodosPriority;
 import todo.api.todo.entity.enums.TodosStatus;
 import todo.api.todo.entity.request.SharedReq;
+import todo.api.todo.entity.request.TodoListReq;
 
 @SpringBootTest
 @Log4j2
@@ -93,5 +96,36 @@ class SharedServiceTest {
         // then
         TodosSharing shared = em.find(TodosSharing.class, sharedId);
         assertThat(shared.getTodos().getId()).isEqualTo(user1Todo1.getId());
+    }
+
+    @Nested
+    class ListTest {
+
+        @BeforeEach
+        public void setup() {
+            SharedReq req = new SharedReq(user2.getEmail(), null);
+            sharedService.todoShare(user1.getId(), user1Todo1.getId(), req);
+            sharedService.todoShare(user1.getId(), user1Todo2.getId(), req);
+        }
+
+        //            for (int i = 1; i <= 10; i++) {
+//                Todos todo = Todos.builder()
+//                        .title("todo " + i)
+//                        .description("todo todo " + (13 - i))
+//                        .status(i % 2 == 1 ? TodosStatus.PENDING : TodosStatus.IN_PROGRESS)
+//                        .priority(TodosPriority.fromValue(i % 3 + 1))
+//                        .user(user1)
+//                        .build();
+//                em.persist(todo);
+//            }
+//            em.flush();
+//            em.clear();
+//        }
+        @Test
+        public void 기본() {
+            PageRequest pageRequest = PageRequest.of(0, 10);
+            TodoListReq req = new TodoListReq(null, null, null);
+            sharedService.sharedList(user2.getId(), pageRequest, req);
+        }
     }
 }

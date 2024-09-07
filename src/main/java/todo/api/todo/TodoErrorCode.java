@@ -17,6 +17,7 @@ public enum TodoErrorCode implements ErrorCode {
     NO_PERMISSION(UNAUTHORIZED, "권한이 없습니다."),
     REQUIRED_EMAIL(BAD_REQUEST, "할일을 공유할 유저의 이메일 주소를 입력해 주세요"),
     INVALID_EMAIL_PATTERN(BAD_REQUEST, "이메일 형식이 아닙니다"),
+    ALREADY_SHARED(BAD_REQUEST, "이미 공유되었습니다."),
     ;
 
     private final HttpStatus status;
