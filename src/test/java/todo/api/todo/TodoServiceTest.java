@@ -2,14 +2,6 @@ package todo.api.todo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import todo.api.account.entity.Users;
-import todo.api.todo.entity.Todos;
-import todo.api.todo.entity.TodosPriority;
-import todo.api.todo.entity.TodosStatus;
-import todo.api.todo.entity.request.TodoCreateReq;
-import todo.api.todo.entity.request.TodoListReq;
-import todo.api.todo.entity.request.TodoUpdateReq;
-import todo.api.todo.entity.response.TodoRes;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -23,6 +15,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import todo.api.account.entity.Users;
+import todo.api.todo.entity.Todos;
+import todo.api.todo.entity.enums.TodosPriority;
+import todo.api.todo.entity.enums.TodosStatus;
+import todo.api.todo.entity.request.TodoCreateReq;
+import todo.api.todo.entity.request.TodoListReq;
+import todo.api.todo.entity.request.TodoUpdateReq;
+import todo.api.todo.entity.response.TodoRes;
+import todo.api.todo.service.TodoService;
 
 @SpringBootTest
 @Log4j2

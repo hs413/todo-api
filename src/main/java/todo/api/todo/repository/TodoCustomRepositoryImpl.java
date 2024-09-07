@@ -1,14 +1,8 @@
 package todo.api.todo.repository;
 
-import static todo.api.todo.entity.QTodos.*;
 import static org.springframework.util.StringUtils.hasText;
+import static todo.api.todo.entity.QTodos.todos;
 
-import todo.api.todo.entity.QTodos;
-import todo.api.todo.entity.Todos;
-import todo.api.todo.entity.TodosStatus;
-import todo.api.todo.entity.request.TodoListReq;
-import todo.api.todo.entity.response.QTodoRes;
-import todo.api.todo.entity.response.TodoRes;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -24,6 +18,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
+import todo.api.todo.entity.QTodos;
+import todo.api.todo.entity.Todos;
+import todo.api.todo.entity.enums.TodosStatus;
+import todo.api.todo.entity.request.TodoListReq;
+import todo.api.todo.entity.response.QTodoRes;
+import todo.api.todo.entity.response.TodoRes;
 
 @Log4j2
 @RequiredArgsConstructor

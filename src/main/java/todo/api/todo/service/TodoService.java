@@ -1,21 +1,22 @@
-package todo.api.todo;
+package todo.api.todo.service;
 
-import todo.api.account.AccountErrorCode;
-import todo.api.account.AccountRepository;
-import todo.api.account.entity.Users;
-import todo.api.common.exception.CustomException;
-import todo.api.todo.entity.Todos;
-import todo.api.todo.entity.request.TodoCreateReq;
-import todo.api.todo.entity.request.TodoListReq;
-import todo.api.todo.entity.request.TodoUpdateReq;
-import todo.api.todo.entity.response.TodoRes;
-import todo.api.todo.repository.TodoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import todo.api.account.AccountErrorCode;
+import todo.api.account.AccountRepository;
+import todo.api.account.entity.Users;
+import todo.api.common.exception.CustomException;
+import todo.api.todo.TodoErrorCode;
+import todo.api.todo.entity.Todos;
+import todo.api.todo.entity.request.TodoCreateReq;
+import todo.api.todo.entity.request.TodoListReq;
+import todo.api.todo.entity.request.TodoUpdateReq;
+import todo.api.todo.entity.response.TodoRes;
+import todo.api.todo.repository.TodoRepository;
 
 @Log4j2
 @Service

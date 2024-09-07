@@ -1,10 +1,10 @@
 package todo.api.todo.entity.response;
 
-import todo.api.todo.entity.Todos;
-import todo.api.todo.entity.TodosPriority;
-import todo.api.todo.entity.TodosStatus;
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDateTime;
+import todo.api.todo.entity.Todos;
+import todo.api.todo.entity.enums.TodosPriority;
+import todo.api.todo.entity.enums.TodosStatus;
 
 public record TodoRes(
         Long id,

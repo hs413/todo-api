@@ -1,4 +1,4 @@
-package todo.api.todo.entity;
+package todo.api.todo.entity.enums;
 
 public enum TodosPriority {
     LOW(1),

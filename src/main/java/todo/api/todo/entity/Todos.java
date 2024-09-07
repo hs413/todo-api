@@ -2,9 +2,6 @@ package todo.api.todo.entity;
 
 import static org.springframework.util.StringUtils.hasText;
 
-import todo.api.account.entity.Users;
-import todo.api.common.BaseEntity;
-import todo.api.todo.entity.request.TodoUpdateReq;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -22,6 +19,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import todo.api.account.entity.Users;
+import todo.api.common.BaseEntity;
+import todo.api.todo.entity.converter.PriorityConverter;
+import todo.api.todo.entity.enums.TodosPriority;
+import todo.api.todo.entity.enums.TodosStatus;
+import todo.api.todo.entity.request.TodoUpdateReq;
 
 @Entity
 @Getter

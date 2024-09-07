@@ -1,9 +1,9 @@
 package todo.api.todo.entity.request;
 
-import todo.api.todo.entity.TodosPriority;
-import todo.api.todo.entity.TodosStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import todo.api.todo.entity.enums.TodosPriority;
+import todo.api.todo.entity.enums.TodosStatus;
 
 public record TodoUpdateReq(
         @Schema(description = "할일 제목", maxLength = 100)

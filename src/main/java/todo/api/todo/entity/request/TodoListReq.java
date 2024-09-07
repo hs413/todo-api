@@ -1,8 +1,8 @@
 package todo.api.todo.entity.request;
 
-import todo.api.todo.entity.TodosStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.util.StringUtils;
+import todo.api.todo.entity.enums.TodosStatus;
 
 public record TodoListReq(
         @Schema(description = "검색어")

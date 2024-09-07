@@ -1,7 +1,8 @@
-package todo.api.todo.entity;
+package todo.api.todo.entity.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import todo.api.todo.entity.enums.TodosPriority;
 
 @Converter(autoApply = true)
 public class PriorityConverter implements AttributeConverter<TodosPriority, Integer> {
