@@ -45,6 +45,7 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository {
                 ))
                 .from(todos)
                 .where(
+                        todos.user.id.eq(userId),
                         search(req.getTypes(), req.keyword()),
                         statusEq(req.status())
                 )
@@ -56,6 +57,7 @@ public class TodoCustomRepositoryImpl implements TodoCustomRepository {
         JPAQuery<Todos> countQuery = queryFactory
                 .select(todos)
                 .where(
+                        todos.user.id.eq(userId),
                         search(req.getTypes(), req.keyword()),
                         statusEq(req.status())
                 )
