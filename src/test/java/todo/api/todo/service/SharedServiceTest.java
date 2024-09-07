@@ -121,28 +121,6 @@ class SharedServiceTest {
         assertThat(ex.getErrorCode()).isEqualTo(TodoErrorCode.ALREADY_SHARED);
     }
 
-    @Test
-    public void 공유된_할일_상세_조회() {
-        // give
-        SharedReq req = new SharedReq(user2.getEmail(), null);
-        sharedService.todoShare(user1.getId(), user1Todo1.getId(), req);
-
-        // when
-        TodoRes res = todoService.todoDetail(user2.getId(), user1Todo1.getId());
-
-        assertThat(res.id()).isEqualTo(user1Todo1.getId());
-    }
-
-    @Test
-    public void 공유되지않은_할일_상세_조회() {
-        // when
-        CustomException ex = assertThrows(CustomException.class,
-                () -> todoService.todoDetail(user2.getId(), user1Todo1.getId()));
-
-        // then
-        assertThat(ex.getErrorCode()).isEqualTo(TodoErrorCode.NO_TODOS);
-    }
-
 
     @Nested
     class SharedListTest {

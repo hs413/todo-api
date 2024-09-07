@@ -30,23 +30,23 @@ public class SharedService {
     private final TodoRepository todoRepository;
 
     public Long todoShare(Long userId, Long todoId, SharedReq req) {
-        // 할일이 없는 경우
+        // 할일 조회 -> 없는 경우 예외처리
         Todos todos = todoRepository.findById(todoId)
                 .orElseThrow(() -> new CustomException(TodoErrorCode.NO_TODOS));
 
-        // 본인이 등록한 할일이 아닌 경우
+        // 본인이 등록한 할일이 아닌 경우 예외처리
         if (!todos.getUser().getId().equals(userId)) {
             throw new CustomException(TodoErrorCode.NO_TODOS);
         }
 
-        // 유저가 존재하지 않는 경우
+        // 유저가 존재하지 않는 경우 예외처리
         Users sharedUser = accountRepository.findByEmail(req.email())
                 .orElseThrow(() -> new CustomException(AccountErrorCode.NO_USERS));
 
         boolean exists = sharedRepository
                 .existsBySharedUserIdAndTodosId(sharedUser.getId(), todoId);
 
-        // 이미 공유된 경우
+        // 이미 공유된 경우 예외처리
         if (exists) {
             throw new CustomException(TodoErrorCode.ALREADY_SHARED);
         }

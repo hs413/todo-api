@@ -1,6 +1,7 @@
 package todo.api.todo.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -16,7 +17,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import todo.api.account.entity.Users;
+import todo.api.common.exception.CustomException;
+import todo.api.todo.TodoErrorCode;
 import todo.api.todo.entity.Todos;
+import todo.api.todo.entity.TodosSharing;
+import todo.api.todo.entity.enums.SharingPermission;
 import todo.api.todo.entity.enums.TodosPriority;
 import todo.api.todo.entity.enums.TodosStatus;
 import todo.api.todo.entity.request.TodoCreateReq;
@@ -97,7 +102,7 @@ class TodoServiceTest {
 
         @Test
         public void 수정() {
-            // when
+            // give
             TodoUpdateReq req = new TodoUpdateReq("todo 2", "todo todo 2",
                     TodosStatus.IN_PROGRESS, TodosPriority.HIGH);
 
@@ -233,6 +238,147 @@ class TodoServiceTest {
             assertThat(list.getContent().stream().allMatch(
                     todo -> todo.status().equals(TodosStatus.PENDING))
             ).isTrue();
+        }
+    }
+
+    @Nested
+    class TodoShard {
+
+        Users user1;
+        Users user2;
+
+        Todos user1Todo1;
+        Todos user1Todo2;
+        Todos user2todo1;
+
+        @BeforeEach
+        void setUp() {
+            user1 = Users.builder()
+                    .username("유저1")
+                    .email("email1@example.com")
+                    .password("1234")
+                    .build();
+
+            user2 = Users.builder()
+                    .username("유저2")
+                    .email("email2@example.com")
+                    .password("1234")
+                    .build();
+
+            user1Todo1 = Todos.builder()
+                    .title("user1 todo1")
+                    .description("user1 todo1")
+                    .status(TodosStatus.PENDING)
+                    .priority(TodosPriority.MID)
+                    .user(user1)
+                    .build();
+
+            user1Todo2 = Todos.builder()
+                    .title("user1 todo2")
+                    .description("user1 todo2")
+                    .status(TodosStatus.PENDING)
+                    .priority(TodosPriority.MID)
+                    .user(user1)
+                    .build();
+
+            user2todo1 = Todos.builder()
+                    .title("user2 todo1")
+                    .description("user2 todo1")
+                    .status(TodosStatus.PENDING)
+                    .priority(TodosPriority.MID)
+                    .user(user2)
+                    .build();
+
+            em.persist(user1);
+            em.persist(user2);
+            em.persist(user1Todo1);
+            em.persist(user1Todo2);
+            em.persist(user2todo1);
+
+            em.flush();
+            em.clear();
+        }
+
+        @Test
+        public void 공유된_할일_상세_조회() {
+            // give
+            TodosSharing shared = TodosSharing.builder()
+                    .todos(user1Todo1)
+                    .sharedUser(user2)
+                    .permission(SharingPermission.READ_ONLY)
+                    .build();
+            em.persist(shared);
+
+            // when
+            TodoRes res = todoService.todoDetail(user2.getId(), user1Todo1.getId());
+
+            assertThat(res.id()).isEqualTo(user1Todo1.getId());
+        }
+
+        @Test
+        public void 공유되지않은_할일_상세_조회() {
+            // when
+            CustomException ex = assertThrows(CustomException.class,
+                    () -> todoService.todoDetail(user2.getId(), user1Todo1.getId()));
+
+            // then
+            assertThat(ex.getErrorCode()).isEqualTo(TodoErrorCode.NO_TODOS);
+        }
+
+        @Test
+        public void 공유된_할일_수정() {
+            // give
+            TodosSharing shared = TodosSharing.builder()
+                    .todos(user1Todo1)
+                    .sharedUser(user2)
+                    .permission(SharingPermission.EDITABLE)
+                    .build();
+            em.persist(shared);
+
+            TodoUpdateReq req = new TodoUpdateReq("todo 2", "todo todo 2",
+                    TodosStatus.IN_PROGRESS, TodosPriority.HIGH);
+            // when
+            Long updatedId = todoService.todoUpdate(user2.getId(), user1Todo1.getId(), req);
+
+            // then
+            Todos todos = em.find(Todos.class, updatedId);
+            assertThat(todos.getId()).isEqualTo(user1Todo1.getId());
+            assertThat(todos.getPriority()).isEqualTo(TodosPriority.HIGH);
+        }
+
+        @Test
+        public void 공유된_할일_수정_권한부족() {
+            // give
+            TodosSharing shared = TodosSharing.builder()
+                    .todos(user1Todo1)
+                    .sharedUser(user2)
+                    .permission(SharingPermission.READ_ONLY)
+                    .build();
+            em.persist(shared);
+
+            TodoUpdateReq req = new TodoUpdateReq("todo 2", "todo todo 2",
+                    TodosStatus.IN_PROGRESS, TodosPriority.HIGH);
+
+            // when
+            CustomException ex = assertThrows(CustomException.class,
+                    () -> todoService.todoUpdate(user2.getId(), user1Todo1.getId(), req));
+
+            assertThat(ex.getErrorCode()).isEqualTo(TodoErrorCode.NO_TODOS);
+
+        }
+
+        @Test
+        public void 공유되지않은_할일_수정() {
+            // give
+            TodoUpdateReq req = new TodoUpdateReq("todo 2", "todo todo 2",
+                    TodosStatus.IN_PROGRESS, TodosPriority.HIGH);
+
+            // when
+            CustomException ex = assertThrows(CustomException.class,
+                    () -> todoService.todoUpdate(user2.getId(), user1Todo1.getId(), req));
+
+            // then
+            assertThat(ex.getErrorCode()).isEqualTo(TodoErrorCode.NO_TODOS);
         }
     }
 }
