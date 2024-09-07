@@ -42,12 +42,8 @@ public class TodoService {
     }
 
     public TodoRes todoDetail(Long userId, Long todoId) {
-        Todos todos = todoRepository.findById(todoId)
+        Todos todos = todoRepository.findByIdOrShared(userId, todoId)
                 .orElseThrow(() -> new CustomException(TodoErrorCode.NO_TODOS));
-
-        if (todos.getUser().getId() != userId) {
-            throw new CustomException(TodoErrorCode.NO_TODOS);
-        }
 
         return new TodoRes(todos);
     }

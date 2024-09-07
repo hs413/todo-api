@@ -1,4 +1,4 @@
-package todo.api.todo;
+package todo.api.todo.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +23,6 @@ import todo.api.todo.entity.request.TodoCreateReq;
 import todo.api.todo.entity.request.TodoListReq;
 import todo.api.todo.entity.request.TodoUpdateReq;
 import todo.api.todo.entity.response.TodoRes;
-import todo.api.todo.service.TodoService;
 
 @SpringBootTest
 @Log4j2
