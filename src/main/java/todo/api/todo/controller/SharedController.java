@@ -7,6 +7,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,5 +55,21 @@ public class SharedController {
             @ParameterObject Pageable pageable
     ) {
         return sharedService.sharedList(userInfo.id(), pageable, req);
+    }
+
+    @DeleteMapping("{todoId}")
+    public void deleteShared(
+            @CustomPrincipal UserInfo userInfo,
+            @PathVariable Long todoId,
+            @RequestBody SharedReq req,
+            BindingResult bindingResult
+    ) {
+
+        BindingResultHandler.execute(bindingResult, List.of(
+                TodoErrorCode.REQUIRED_EMAIL,
+                TodoErrorCode.INVALID_EMAIL_PATTERN
+        ));
+
+        sharedService.sharingCancel(userInfo.id(), todoId, req);
     }
 }
