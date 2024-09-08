@@ -12,9 +12,12 @@ import todo.api.account.AccountRepository;
 import todo.api.account.entity.Users;
 import todo.api.common.exception.CustomException;
 import todo.api.notifications.entity.Notifications;
+import todo.api.notifications.entity.NotificationsHistory;
+import todo.api.notifications.entity.RepeatUnit;
 import todo.api.notifications.entity.request.NotificationCreateReq;
 import todo.api.notifications.entity.request.NotificationUpdateReq;
 import todo.api.notifications.entity.response.NotificationRes;
+import todo.api.notifications.repository.NotificationHistoryRepository;
 import todo.api.notifications.repository.NotificationRepository;
 import todo.api.todo.TodoErrorCode;
 import todo.api.todo.entity.Todos;
@@ -30,6 +33,7 @@ public class NotificationService {
     private final AccountRepository accountRepository;
     private final TodoRepository todoRepository;
     private final RedisTemplate<String, Long> redisTemplate;
+    private final NotificationHistoryRepository notificationHistoryRepository;
     private final String NOTIFICATION_KEY = "notifications";
 
     public Long notificationCreate(Long userId, NotificationCreateReq req) {
@@ -55,7 +59,7 @@ public class NotificationService {
 
         notificationRepository.save(notification);
 
-        addSchedule(notification);
+        addSchedule(notification.getId(), notification.getDueDate());
 
         return notification.getId();
     }
@@ -84,7 +88,7 @@ public class NotificationService {
 
         if (changedDueDate) {
             removeSchedule(notification.getId());
-            addSchedule(notification);
+            addSchedule(notification.getId(), notification.getDueDate());
         }
 
         return notification.getId();
@@ -106,33 +110,58 @@ public class NotificationService {
                     return new CustomException(NotificationErrorCode.NO_NOTIFICATION);
                 });
 
-        // TODO: 이메일 전송, 푸시 알림 등
+        // TODO: 이메일 발송, 푸시 알림 등
         log.info("---------------- 알림 : [{}] {}"
                 , notification.getTodo().getTitle(), notification.getMessage());
 
-        // 알림 전송 후 스케줄러에서 삭제
-        removeSchedule(notificationId);
-        // 반복 알림 처리
-//        if (notification.getRepeatCount() > 0) {
-//            notification.setRepeatCount(notification.getRepeatCount() - 1);
-//            notification.setDueDate(calculateNextDueDate(notification));
-//            notificationRepository.save(notification);
-//            redisNotificationService.scheduleNotification(notification.getId(), notification.getDueDate());
-//        }
+        // 알림 발송 history 등록
+        NotificationsHistory history = NotificationsHistory.builder()
+                .notifications(notification)
+                .version(notification.getVersion())
+                .build();
 
+        notificationHistoryRepository.save(history);
+
+        // 알림 발송 후 스케줄러에서 삭제
+        removeSchedule(notificationId);
+
+        // 알림 반복 처리
+        Long sentCount = notificationHistoryRepository
+                .sentCount(notificationId, notification.getVersion());
+        if (notification.getRepeatCount() > sentCount - 1) {
+            log.info("----------------------- repeat");
+            LocalDateTime nextDueDate = calculateNextDueDate(notification);
+
+            addSchedule(notification.getId(), nextDueDate);
+        }
+    }
+
+    private LocalDateTime calculateNextDueDate(Notifications notification) {
+        LocalDateTime dueDate = notification.getDueDate();
+        Integer interval = notification.getRepeatInterval();
+        RepeatUnit repeatUnit = notification.getRepeatUnit();
+
+        switch (repeatUnit) {
+            case MINUTES:
+                return dueDate.plusMinutes(interval);
+            case HOUR:
+                return dueDate.plusHours(interval);
+            default:
+                return dueDate.plusDays(interval);
+        }
     }
 
     private boolean isDueDateChanged(LocalDateTime originDueDate, LocalDateTime dueDate) {
         return !originDueDate.isEqual(dueDate.withSecond(0).withNano(0));
     }
 
-    private void addSchedule(Notifications notification) {
-        double score = notification.getDueDate()
+    private void addSchedule(Long notificationId, LocalDateTime dueDate) {
+        double score = dueDate
                 .toInstant(ZoneOffset.UTC)
                 .toEpochMilli();
 
         redisTemplate.opsForZSet()
-                .add(NOTIFICATION_KEY, notification.getId(), score);
+                .add(NOTIFICATION_KEY, notificationId, score);
     }
 
     private void removeSchedule(Long notificationId) {

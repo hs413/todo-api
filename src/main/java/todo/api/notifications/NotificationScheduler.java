@@ -18,7 +18,7 @@ public class NotificationScheduler {
     private final NotificationService notificationService;
     private final String NOTIFICATION_KEY = "notifications";
 
-    @Scheduled(fixedRate = 1000 * 5)
+    @Scheduled(fixedRate = 1000 * 10)
     public void checkAndSendNotifications() {
         long currentTime = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli();
         Set<Long> notificationIds = redisTemplate.opsForZSet()

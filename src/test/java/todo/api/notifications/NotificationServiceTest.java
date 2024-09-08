@@ -72,6 +72,7 @@ class NotificationServiceTest {
         assertThat(notification.getRepeatCount()).isEqualTo(0);
         assertThat(notification.getMessage()).isEqualTo("할일 확인!");
         assertThat(notification.getDueDate()).isEqualTo(now.withSecond(0).withNano(0));
+        assertThat(notification.getVersion()).isEqualTo(0);
         notificationService.sendNotification(notificationId);
     }
 
@@ -127,6 +128,7 @@ class NotificationServiceTest {
         Notifications updated = em.find(Notifications.class, updatedId);
         assertThat(updated.getRepeatCount()).isEqualTo(0);
         assertThat(updated.getMessage()).isEqualTo("할일 확인!!");
+        assertThat(updated.getVersion()).isEqualTo(1);
     }
 
     @Test

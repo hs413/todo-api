@@ -58,11 +58,14 @@ public class Notifications extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private RepeatUnit repeatUnit;
 
+    private Integer version;
+
     @PrePersist
     @PreUpdate
     public void prePersistUpdate() {
         dueDate = dueDate.withSecond(0).withNano(0);  // 초를 0으로 설정
         repeatCount = repeatCount == null ? 0 : repeatCount;
+        version = version == null ? 0 : version + 1;
 
         if (repeatCount > 0) {
             repeatInterval = repeatInterval != null ? repeatInterval : 1;
