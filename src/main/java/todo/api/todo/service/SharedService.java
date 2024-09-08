@@ -30,14 +30,9 @@ public class SharedService {
     private final TodoRepository todoRepository;
 
     public Long todoShare(Long userId, Long todoId, SharedReq req) {
-        // 할일 조회 -> 없는 경우 예외처리
-        Todos todos = todoRepository.findById(todoId)
+        Todos todos = todoRepository.findByIdAndUserId(todoId, userId)
+                // 본인이 등록한 할일이 아닌 경우 예외처리
                 .orElseThrow(() -> new CustomException(TodoErrorCode.NO_TODOS));
-
-        // 본인이 등록한 할일이 아닌 경우 예외처리
-        if (!todos.getUser().getId().equals(userId)) {
-            throw new CustomException(TodoErrorCode.NO_TODOS);
-        }
 
         // 유저가 존재하지 않는 경우 예외처리
         Users sharedUser = accountRepository.findByEmail(req.email())
@@ -58,5 +53,21 @@ public class SharedService {
 
     public Page<TodoRes> sharedList(Long userId, Pageable pageable, TodoListReq req) {
         return sharedRepository.findSharedList(userId, pageable, req);
+    }
+
+    public void sharingCancel(Long userId, Long todoId, SharedReq req) {
+        Todos todos = todoRepository.findByIdAndUserId(todoId, userId)
+                // 본인이 등록한 할일이 아닌 경우 예외처리
+                .orElseThrow(() -> new CustomException(TodoErrorCode.NO_TODOS));
+
+        // 유저가 존재하지 않는 경우 예외처리
+        Users sharedUser = accountRepository.findByEmail(req.email())
+                .orElseThrow(() -> new CustomException(AccountErrorCode.NO_USERS));
+
+        TodosSharing shared = sharedRepository
+                .findBySharedUserIdAndTodosId(sharedUser.getId(), todoId)
+                .orElseThrow(() -> new CustomException(TodoErrorCode.NO_SHARED));
+
+        sharedRepository.delete(shared);
     }
 }

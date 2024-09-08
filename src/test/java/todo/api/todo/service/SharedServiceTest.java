@@ -8,7 +8,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -121,38 +120,43 @@ class SharedServiceTest {
         assertThat(ex.getErrorCode()).isEqualTo(TodoErrorCode.ALREADY_SHARED);
     }
 
+    @Test
+    public void 할일_공유_취소() {
+        // give
+        SharedReq req = new SharedReq(user2.getEmail(), null);
+        Long sharedId = sharedService.todoShare(user1.getId(), user1Todo1.getId(), req);
 
-    @Nested
-    class SharedListTest {
+        // when
+        sharedService.sharingCancel(user1.getId(), user1Todo1.getId(), req);
 
-        @BeforeEach
-        public void setup() {
-//            for (int i = 1; i <= 10; i++) {
-//                Todos todo = Todos.builder()
-//                        .title("todo " + i)
-//                        .description("todo todo " + (13 - i))
-//                        .status(i % 2 == 1 ? TodosStatus.PENDING : TodosStatus.IN_PROGRESS)
-//                        .priority(TodosPriority.fromValue(i % 3 + 1))
-//                        .user(user1)
-//                        .build();
-//                em.persist(todo);
-//            }
-//            em.flush();
-//            em.clear();
-        }
+        // then
+        TodosSharing shared = em.find(TodosSharing.class, sharedId);
+        assertThat(shared).isNull();
+    }
 
+    @Test
+    public void 할일_공유_취소_예외() {
+        // give
+        SharedReq req = new SharedReq(user2.getEmail(), null);
 
-        @Test
-        public void 공유된_할일_목록() {
-            SharedReq sharedReq = new SharedReq(user2.getEmail(), null);
-            sharedService.todoShare(user1.getId(), user1Todo1.getId(), sharedReq);
-            sharedService.todoShare(user1.getId(), user1Todo2.getId(), sharedReq);
+        // when
+        CustomException ex = assertThrows(CustomException.class,
+                () -> sharedService.sharingCancel(user1.getId(), user1Todo1.getId(), req));
 
-            PageRequest pageRequest = PageRequest.of(0, 10);
-            TodoListReq req = new TodoListReq(null, null, null);
-            Page<TodoRes> res = sharedService.sharedList(user2.getId(), pageRequest, req);
+        // then
+        assertThat(ex.getErrorCode()).isEqualTo(TodoErrorCode.NO_SHARED);
+    }
 
-            assertThat(res.getContent()).hasSize(2);
-        }
+    @Test
+    public void 공유된_할일_목록() {
+        SharedReq sharedReq = new SharedReq(user2.getEmail(), null);
+        sharedService.todoShare(user1.getId(), user1Todo1.getId(), sharedReq);
+        sharedService.todoShare(user1.getId(), user1Todo2.getId(), sharedReq);
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        TodoListReq req = new TodoListReq(null, null, null);
+        Page<TodoRes> res = sharedService.sharedList(user2.getId(), pageRequest, req);
+
+        assertThat(res.getContent()).hasSize(2);
     }
 }
