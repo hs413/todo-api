@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import todo.api.account.entity.Users;
 import todo.api.notifications.entity.Notifications;
 import todo.api.notifications.entity.request.NotificationCreateReq;
+import todo.api.notifications.entity.request.NotificationUpdateReq;
+import todo.api.notifications.entity.response.NotificationRes;
 import todo.api.todo.entity.Todos;
 import todo.api.todo.entity.enums.TodosPriority;
 import todo.api.todo.entity.enums.TodosStatus;
@@ -71,5 +73,87 @@ class NotificationServiceTest {
         assertThat(notification.getMessage()).isEqualTo("할일 확인!");
         assertThat(notification.getDueDate()).isEqualTo(now.withSecond(0).withNano(0));
         notificationService.sendNotification(notificationId);
+    }
+
+    @Test
+    public void 알림_조회() {
+        // give
+        Notifications notification = Notifications.builder()
+                .todo(todo)
+                .user(user)
+                .dueDate(LocalDateTime.now().plusMinutes(10))
+                .message("할일 확인!")
+                .build();
+
+        em.persist(notification);
+        em.flush();
+        em.clear();
+
+        // when
+        NotificationRes res = notificationService
+                .notificationDetail(user.getId(), notification.getId());
+
+        // then
+        assertThat(res.repeatCount()).isEqualTo(0);
+        assertThat(res.message()).isEqualTo("할일 확인!");
+    }
+
+
+    @Test
+    public void 알림_수정() {
+        LocalDateTime now = LocalDateTime.now().plusMinutes(10);
+        // give
+        Notifications notification = Notifications.builder()
+                .todo(todo)
+                .user(user)
+                .dueDate(now)
+                .message("할일 확인!")
+                .build();
+
+        em.persist(notification);
+        em.flush();
+        em.clear();
+
+        NotificationUpdateReq req = new NotificationUpdateReq(now, "할일 확인!!",
+                null, null, null);
+
+        // when
+        Long updatedId = notificationService
+                .notificationUpdate(user.getId(), notification.getId(), req);
+        em.flush();
+        em.clear();
+
+        // then
+        Notifications updated = em.find(Notifications.class, updatedId);
+        assertThat(updated.getRepeatCount()).isEqualTo(0);
+        assertThat(updated.getMessage()).isEqualTo("할일 확인!!");
+    }
+
+    @Test
+    public void 알림_삭제() {
+        LocalDateTime now = LocalDateTime.now().plusMinutes(10);
+        // give
+        Notifications notification = Notifications.builder()
+                .todo(todo)
+                .user(user)
+                .dueDate(now)
+                .message("할일 확인!")
+                .build();
+
+        em.persist(notification);
+        em.flush();
+        em.clear();
+
+        NotificationUpdateReq req = new NotificationUpdateReq(now, "할일 확인!!",
+                null, null, null);
+
+        // when
+        notificationService.notificationDelete(user.getId(), notification.getId());
+        em.flush();
+        em.clear();
+
+        // then
+        Notifications deleted = em.find(Notifications.class, notification.getId());
+        assertThat(deleted).isNull();
     }
 }

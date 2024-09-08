@@ -13,6 +13,8 @@ import todo.api.account.entity.Users;
 import todo.api.common.exception.CustomException;
 import todo.api.notifications.entity.Notifications;
 import todo.api.notifications.entity.request.NotificationCreateReq;
+import todo.api.notifications.entity.request.NotificationUpdateReq;
+import todo.api.notifications.entity.response.NotificationRes;
 import todo.api.notifications.repository.NotificationRepository;
 import todo.api.todo.TodoErrorCode;
 import todo.api.todo.entity.Todos;
@@ -58,11 +60,50 @@ public class NotificationService {
         return notification.getId();
     }
 
+    public NotificationRes notificationDetail(Long userId, Long notificationId) {
+        Notifications notification = notificationRepository
+                .findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() -> new CustomException(NotificationErrorCode.NO_NOTIFICATION));
+
+        return new NotificationRes(notification);
+    }
+
+    public Long notificationUpdate(Long userId, Long notificationId, NotificationUpdateReq req) {
+        Notifications notification = notificationRepository
+                .findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() -> new CustomException(NotificationErrorCode.NO_NOTIFICATION));
+
+        if (req.dueDate().isBefore(LocalDateTime.now())) {
+            throw new CustomException(NotificationErrorCode.NOT_BEFORE_NOW);
+        }
+
+        boolean changedDueDate = isDueDateChanged(notification.getDueDate(), req.dueDate());
+
+        notification.update(req);
+        notificationRepository.save(notification);
+
+        if (changedDueDate) {
+            removeSchedule(notification.getId());
+            addSchedule(notification);
+        }
+
+        return notification.getId();
+    }
+
+    public void notificationDelete(Long userId, Long notificationId) {
+        Notifications notification = notificationRepository
+                .findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() -> new CustomException(NotificationErrorCode.NO_NOTIFICATION));
+
+        notificationRepository.delete(notification);
+        removeSchedule(notification.getId());
+    }
+
     public void sendNotification(Long notificationId) {
         Notifications notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> {
                     removeSchedule(notificationId);
-                    return new RuntimeException("Notification not found");
+                    return new CustomException(NotificationErrorCode.NO_NOTIFICATION);
                 });
 
         // TODO: 이메일 전송, 푸시 알림 등
@@ -79,6 +120,10 @@ public class NotificationService {
 //            redisNotificationService.scheduleNotification(notification.getId(), notification.getDueDate());
 //        }
 
+    }
+
+    private boolean isDueDateChanged(LocalDateTime originDueDate, LocalDateTime dueDate) {
+        return !originDueDate.isEqual(dueDate.withSecond(0).withNano(0));
     }
 
     private void addSchedule(Notifications notification) {

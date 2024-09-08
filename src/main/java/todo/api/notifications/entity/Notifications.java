@@ -2,6 +2,8 @@ package todo.api.notifications.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import todo.api.account.entity.Users;
 import todo.api.common.BaseEntity;
+import todo.api.notifications.entity.request.NotificationUpdateReq;
 import todo.api.todo.entity.Todos;
 
 @Entity
@@ -52,6 +55,7 @@ public class Notifications extends BaseEntity {
 
     private Integer repeatInterval;
 
+    @Enumerated(EnumType.STRING)
     private RepeatUnit repeatUnit;
 
     @PrePersist
@@ -67,6 +71,29 @@ public class Notifications extends BaseEntity {
         if (repeatCount > 0) {
             repeatUnit = repeatUnit != null ? repeatUnit : RepeatUnit.HOUR;
         }
+    }
+
+    public void update(NotificationUpdateReq req) {
+        if (dueDate != null) {
+            dueDate = req.dueDate();
+        }
+
+        if (message != null) {
+            message = req.message();
+        }
+
+        if (repeatCount != null) {
+            repeatCount = req.repeatCount();
+        }
+
+        if (repeatInterval != null) {
+            repeatInterval = req.repeatInterval();
+        }
+
+        if (repeatUnit != null) {
+            repeatUnit = req.repeatUnit();
+        }
+
     }
 
 }
