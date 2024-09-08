@@ -13,7 +13,6 @@ import todo.api.auth.CustomPrincipal;
 import todo.api.auth.UserInfo;
 import todo.api.common.exception.BindingResultHandler;
 import todo.api.notifications.entity.request.NotificationCreateReq;
-import todo.api.notifications.service.NotificationService;
 
 @Log4j2
 @RestController

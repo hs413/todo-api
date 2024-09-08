@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import todo.api.account.entity.Users;
 import todo.api.notifications.entity.Notifications;
 import todo.api.notifications.entity.request.NotificationCreateReq;
-import todo.api.notifications.service.NotificationService;
 import todo.api.todo.entity.Todos;
 import todo.api.todo.entity.enums.TodosPriority;
 import todo.api.todo.entity.enums.TodosStatus;
@@ -36,14 +35,14 @@ class NotificationServiceTest {
     @BeforeEach
     void setUp() {
         user = Users.builder()
-                .username("유저1")
+                .username("유저")
                 .email("email1@example.com")
                 .password("1234")
                 .build();
 
         todo = Todos.builder()
-                .title("user2 todo1")
-                .description("user2 todo1")
+                .title("todo 제목")
+                .description("todo 설명")
                 .status(TodosStatus.PENDING)
                 .priority(TodosPriority.MID)
                 .user(user)
@@ -59,8 +58,8 @@ class NotificationServiceTest {
     @Test
     public void 알림_등록() {
         // give
-        LocalDateTime now = LocalDateTime.now();
-        NotificationCreateReq req = new NotificationCreateReq(now.plusMinutes(10),
+        LocalDateTime now = LocalDateTime.now().plusMinutes(10);
+        NotificationCreateReq req = new NotificationCreateReq(now, "할일 확인!",
                 todo.getId(), 0, null, null);
 
         // when
@@ -69,6 +68,8 @@ class NotificationServiceTest {
         // then
         Notifications notification = em.find(Notifications.class, notificationId);
         assertThat(notification.getRepeatCount()).isEqualTo(0);
+        assertThat(notification.getMessage()).isEqualTo("할일 확인!");
         assertThat(notification.getDueDate()).isEqualTo(now.withSecond(0).withNano(0));
+        notificationService.sendNotification(notificationId);
     }
 }

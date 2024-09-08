@@ -1,9 +1,10 @@
 CREATE TABLE notifications
 (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id         BIGINT    NOT NULL,
-    todo_id         BIGINT    NOT NULL,
-    due_date        TIMESTAMP NOT NULL,
+    user_id         BIGINT       NOT NULL,
+    todo_id         BIGINT       NOT NULL,
+    due_date        TIMESTAMP    NOT NULL,
+    message         VARCHAR(255) NOT NULL,
     repeat_count    TINYINT   DEFAULT 0,
     repeat_interval INT,
     repeat_unit     VARCHAR(10),
