@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import todo.api.account.AccountErrorCode;
@@ -15,7 +17,9 @@ import todo.api.notifications.entity.Notifications;
 import todo.api.notifications.entity.NotificationsHistory;
 import todo.api.notifications.entity.RepeatUnit;
 import todo.api.notifications.entity.request.NotificationCreateReq;
+import todo.api.notifications.entity.request.NotificationListReq;
 import todo.api.notifications.entity.request.NotificationUpdateReq;
+import todo.api.notifications.entity.response.NotificationListRes;
 import todo.api.notifications.entity.response.NotificationRes;
 import todo.api.notifications.repository.NotificationHistoryRepository;
 import todo.api.notifications.repository.NotificationRepository;
@@ -62,6 +66,11 @@ public class NotificationService {
         addSchedule(notification.getId(), notification.getDueDate());
 
         return notification.getId();
+    }
+
+    public Page<NotificationListRes> notificationList(Long userId, Pageable pageable,
+            NotificationListReq req) {
+        return notificationRepository.findNotificationList(userId, pageable, req);
     }
 
     public NotificationRes notificationDetail(Long userId, Long notificationId) {

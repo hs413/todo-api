@@ -6,15 +6,22 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import todo.api.account.entity.Users;
 import todo.api.notifications.entity.Notifications;
 import todo.api.notifications.entity.request.NotificationCreateReq;
+import todo.api.notifications.entity.request.NotificationListReq;
 import todo.api.notifications.entity.request.NotificationUpdateReq;
+import todo.api.notifications.entity.response.NotificationListRes;
 import todo.api.notifications.entity.response.NotificationRes;
 import todo.api.todo.entity.Todos;
 import todo.api.todo.entity.enums.TodosPriority;
@@ -133,8 +140,8 @@ class NotificationServiceTest {
 
     @Test
     public void 알림_삭제() {
-        LocalDateTime now = LocalDateTime.now().plusMinutes(10);
         // give
+        LocalDateTime now = LocalDateTime.now().plusMinutes(10);
         Notifications notification = Notifications.builder()
                 .todo(todo)
                 .user(user)
@@ -157,5 +164,120 @@ class NotificationServiceTest {
         // then
         Notifications deleted = em.find(Notifications.class, notification.getId());
         assertThat(deleted).isNull();
+    }
+
+    @Nested
+    @DisplayName("알림 리스트 테스트")
+    class ListTest {
+
+        @BeforeEach
+        void setUp() {
+            for (int i = 1; i <= 12; i++) {
+                Todos todo = Todos.builder()
+                        .title("todo " + i)
+                        .description("todo 설명")
+                        .status(TodosStatus.PENDING)
+                        .priority(TodosPriority.MID)
+                        .user(user)
+                        .build();
+
+                em.persist(todo);
+
+                LocalDateTime now = LocalDateTime.now();
+                Notifications notification = Notifications.builder()
+                        .todo(todo)
+                        .user(user)
+                        .dueDate(i % 2 == 1 ? now.plusMinutes(i * 10) : now.plusDays(i))
+                        .message("todo " + i + "할일 확인!")
+                        .build();
+
+                em.persist(notification);
+
+            }
+            em.flush();
+            em.clear();
+        }
+
+        @Test
+        public void 리스트_기본() {
+            // give
+            PageRequest pageRequest = PageRequest.of(0, 10);
+            NotificationListReq req = new NotificationListReq(null,
+                    null, null);
+
+            // when
+            Page<NotificationListRes> res =
+                    notificationService.notificationList(user.getId(), pageRequest, req);
+
+            // then
+            List<NotificationListRes> resList = res.getContent();
+            assertThat(resList).hasSize(10);
+
+        }
+
+        @Test
+        public void 리스트_할일_제목_검색() {
+            // give
+            PageRequest pageRequest = PageRequest.of(0, 10);
+            NotificationListReq req = new NotificationListReq("2",
+                    null, null);
+
+            // when
+            Page<NotificationListRes> res =
+                    notificationService.notificationList(user.getId(), pageRequest, req);
+
+            // then
+            List<NotificationListRes> resList = res.getContent();
+            assertThat(resList).hasSize(2);
+        }
+
+        @Test
+        public void 리스트_지정날짜_이후_검색() {
+            // give
+            PageRequest pageRequest = PageRequest.of(0, 10);
+            NotificationListReq req = new NotificationListReq(null,
+                    LocalDateTime.now().withSecond(0).withNano(0).plusDays(1), null);
+
+            // when
+            Page<NotificationListRes> res =
+                    notificationService.notificationList(user.getId(), pageRequest, req);
+
+            // then
+            List<NotificationListRes> resList = res.getContent();
+            assertThat(resList).hasSize(6);
+        }
+
+        @Test
+        public void 리스트_지정날짜_이전_검색() {
+            // give
+            PageRequest pageRequest = PageRequest.of(0, 10);
+            NotificationListReq req = new NotificationListReq(null,
+                    null, LocalDateTime.now().plusDays(1).withSecond(0).withNano(0));
+
+            // when
+            Page<NotificationListRes> res =
+                    notificationService.notificationList(user.getId(), pageRequest, req);
+
+            // then
+            List<NotificationListRes> resList = res.getContent();
+            assertThat(resList).hasSize(6);
+        }
+
+        @Test
+        public void 리스트_날짜_범위_검색() {
+            // give
+            PageRequest pageRequest = PageRequest.of(0, 10);
+            NotificationListReq req = new NotificationListReq(null,
+                    LocalDateTime.now().plusMinutes(30).withSecond(0).withNano(0),
+                    LocalDateTime.now().plusDays(1).withSecond(0).withNano(0));
+
+            // when
+            Page<NotificationListRes> res =
+                    notificationService.notificationList(user.getId(), pageRequest, req);
+
+            // then
+            List<NotificationListRes> resList = res.getContent();
+            assertThat(resList).hasSize(5);
+        }
     }
 }
